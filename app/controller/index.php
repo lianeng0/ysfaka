@@ -3,6 +3,7 @@
 namespace YS\app\controller;
 
 use YS\app\libs\Controller;
+use Endroid\QrCode\QrCode;
 
 /**首页控制器
  * Class index
@@ -32,7 +33,7 @@ class index extends Controller
     public function typegd()
     {
         $data = $this->getReqdata($_POST) ? $this->getReqdata($_POST) : 0;//分类id
-        $lists = $this->model()->select()->from('goods')->where(array('fields' => 'cid=? ', 'values' => array($data['cid'])))->orderby('ord desc')->fetchAll();
+        $lists = $this->model()->select()->from('goods')->where(array('fields' => 'cid=? and is_ste = 1', 'values' => array($data['cid'])))->orderby('ord desc')->fetchAll();
         $html = "";
         if ($lists) {
             foreach ($lists as $v) {
@@ -48,7 +49,7 @@ class index extends Controller
     public function getGoodsInfo()
     {
         $id = $this->req->post('id');
-        $data = $this->model()->select()->from('goods')->where(array('fields' => 'id=?', 'values' => array($id)))->fetchRow();
+        $data = $this->model()->select()->from('goods')->where(array('fields' => 'id=? and is_ste = 1', 'values' => array($id)))->fetchRow();
         if (!$data) resMsg(0);
         //判断是否是自动发卡
         if ($data['type'] == 0) {
@@ -103,6 +104,7 @@ class index extends Controller
     public function postOrder()
     {
         $post = $this->getReqdata($_POST);
+        $post['number'] = intval($post['number']);
         if($post['gid'] =="" || intval($post['number']) <=0 || $post['account'] == ""){
             resMsg(0,null,'充值账号、数量、商品不能为空，请仔细填写');
         }
@@ -152,25 +154,15 @@ class index extends Controller
         if($payset){
             foreach ($payset as $v){
                 switch ($v['code']){
-                    case 'zcyzf':
-                        $html.= " <a  href=\"/pay/index?id=".$orderid."&type=alipay&paycode=".$v['code']."\" class=\"am-btn am-btn-warning am-round am-icon-credit-card-alt\">支付宝</a>
-                    <a  href=\"/pay/index?id=".$orderid."&type=wxpay&paycode=".$v['code']."\" class=\"am-btn am-btn-success am-round am-icon-wechat\">微信支付</a>
-                    <a  href=\"/pay/index?id=".$orderid."&type=qqpay&paycode=".$v['code']."\" class=\"am-btn am-btn-default am-round am-icon-qq\">QQ支付</a>";
-                        break;
                     case 'zfbf2f':
                         $html.= "<a  href=\"/pay/index?id=".$orderid."&type=alipay&paycode=".$v['code']."\" class=\"am-btn am-btn-warning am-round am-icon-credit-card-alt\">支付宝当面付</a>";
                         break;
-                    case 'paysapi':
-                        $html.= "<a  href=\"/pay/index?id=".$orderid."&type=1&paycode=".$v['code']."\" class=\"am-btn am-btn-warning am-round am-icon-credit-card-alt\">支付宝扫码</a>
-                    <a target='_blank' href=\"/pay/index?id=".$orderid."&type=2&paycode=".$v['code']."\" class=\"am-btn am-btn-success am-round am-icon-wechat\">微信扫码</a>";
-                        break;
-                    case 'mazf':
-                        $html.= " <a  href=\"/pay/index?id=".$orderid."&type=1&paycode=".$v['code']."\" class=\"am-btn am-btn-warning am-round am-icon-credit-card-alt\">支付宝</a>
-                    <a  href=\"/pay/index?id=".$orderid."&type=3&paycode=".$v['code']."\" class=\"am-btn am-btn-success am-round am-icon-wechat\">微信支付</a>
-                    <a  href=\"/pay/index?id=".$orderid."&type=2&paycode=".$v['code']."\" class=\"am-btn am-btn-default am-round am-icon-qq\">QQ支付</a>";
-                        break;
                     case 'alipay':
                         $html.= "<a  href=\"/pay/index?id=".$orderid."&type=alipay&paycode=".$v['code']."\" class=\"am-btn am-btn-warning am-round am-icon-credit-card-alt\">支付宝即时到账</a>";
+                        break;
+                    case 'syzf':
+                        $html.= "<a  href=\"/pay/index?id=".$orderid."&type=zfbqr&paycode=".$v['code']."\" class=\"am-btn am-btn-warning am-round am-icon-credit-card-alt\">支付宝</a>";
+                        $html.= "<a  href=\"/pay/index?id=".$orderid."&type=wxqr&paycode=".$v['code']."\" class=\"am-btn am-btn-warning am-round am-icon-credit-card-alt\">微信</a>";
                         break;
                 }
             }
@@ -254,6 +246,16 @@ class index extends Controller
         }
         resMsg(0,null,'下单失败！');
 
+    }
+    /**
+     * 生产二维码
+     */
+    public function qrcode()
+    {
+        $url = $this->req->get('url') ? $this->req->get('url') : 'http://phpke.cn';
+        $qrCode = new QrCode($url);
+        header('Content-Type: '.$qrCode->getContentType());
+        echo $qrCode->writeString();
     }
 
 }

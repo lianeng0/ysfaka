@@ -1,5 +1,6 @@
 
-### 2018-5-24 域名备案中，请访问备用域名www.szfaka.cc 
+
+### 年度版已发布，请前往 https://github.com/assimon/yearysfk 下载最新版本
 
 
 ### 什么是云尚发卡系统？
@@ -10,12 +11,20 @@
 * mysql >= 5.2
 * win or linux
 
-### demo地址：[http://demo.yunscx.com](http://demo.szfaka.cc/)
+### 安装后务必添加nginx伪静态
+```
+location / {
+   if (!-e $request_filename) {
+   rewrite  ^(.*)$  /index.php?$1  last;
+   break;
+    }
+ }
 
-### 更多详细内容及配置教程请访问：
-## [程序详情](http://www.szfaka.cc/cms/a/ysfaka.html)
+```
 
-### BUG反馈、程序交流 QQ群：568679748
+### demo地址：[http://fk.phpke.cn](http://fk.phpke.cn)
+
+
 
 ### 捐助
 **感谢以下人员对开源事业的支持** 
@@ -36,11 +45,4 @@
 本项目仅做技术交流使用，任何人或组织无论以何种形式将其用在其他任何地方由此引发的各种问题均与本人无关
 
 
-### 关于作者
 
-```php
-  return [
-    $nickName  : "ashang",
-    $site : "http://utf8.hk"
-  ]
-```
