@@ -9,6 +9,17 @@
 * mysql >= 5.2
 * win or linux
 
+### 安装后务必添加nginx伪静态
+```
+location / {
+   if (!-e $request_filename) {
+   rewrite  ^(.*)$  /index.php?$1  last;
+   break;
+    }
+ }
+
+```
+
 ### demo地址：[http://fk.phpke.cn](http://fk.phpke.cn)
 
 
